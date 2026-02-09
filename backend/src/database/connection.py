@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get database URL from environment variable
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@localhost/dbname")
+# Using SQLite for local development
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./todo.db")
 
 # Create the engine
-engine = create_engine(DATABASE_URL, echo=True)
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+engine = create_engine(DATABASE_URL, echo=True, connect_args=connect_args)

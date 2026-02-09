@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Todo, TodoCreate, TodoUpdate } from '../../types/todo';
-import { todoService, authService } from '../../lib/api';
+import { todoService } from '../../lib/api';
 import { authStore, authActions } from '../../lib/auth';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -91,24 +92,32 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading your todos...</div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+        <div className="text-xl text-gray-700">Loading your todos...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">Todo Dashboard</h1>
+              <div className="flex-shrink-0 flex items-center">
+                <Link href="/" className="text-indigo-600 font-bold text-xl">TodoApp</Link>
+              </div>
+              <div className="hidden md:block ml-10">
+                <div className="flex items-baseline space-x-4">
+                  <span className="text-gray-500 text-sm">Dashboard</span>
+                </div>
+              </div>
             </div>
             <div className="flex items-center">
               <button
                 onClick={handleSignOut}
-                className="ml-4 px-3 py-2 rounded-md text-sm font-medium text-white bg-red-600 hover:bg-red-700"
+                className="ml-4 px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
               >
                 Sign out
               </button>
@@ -117,23 +126,87 @@ export default function DashboardPage() {
         </div>
       </nav>
 
-      <div className="py-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="py-6">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {error && (
-            <div className="rounded-md bg-red-50 p-4 mb-4">
+            <div className="rounded-md bg-red-50 p-4 mb-6">
               <div className="text-sm text-red-700">{error}</div>
             </div>
           )}
 
-          {/* Create Todo Form */}
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
-            <div className="px-4 py-5 sm:px-6">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">Create New Todo</h3>
+          {/* Stats Overview */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 bg-indigo-500 rounded-md p-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Total Tasks</dt>
+                      <dd className="flex items-baseline">
+                        <div className="text-2xl font-semibold text-gray-900">{todos.length}</div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="border-t border-gray-200 px-4 py-5 sm:p-6">
+
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Pending</dt>
+                      <dd className="flex items-baseline">
+                        <div className="text-2xl font-semibold text-gray-900">{todos.filter(t => t.status === 'pending').length}</div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white overflow-hidden shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="ml-5 w-0 flex-1">
+                    <dl>
+                      <dt className="text-sm font-medium text-gray-500 truncate">Completed</dt>
+                      <dd className="flex items-baseline">
+                        <div className="text-2xl font-semibold text-gray-900">{todos.filter(t => t.status === 'completed').length}</div>
+                      </dd>
+                    </dl>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Create Todo Form */}
+          <div className="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">Create New Todo</h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">Add a new task to your list</p>
+            </div>
+            <div className="px-4 py-5 sm:p-6">
               <form onSubmit={handleCreateTodo}>
-                <div className="grid grid-cols-6 gap-6">
-                  <div className="col-span-6">
+                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                  <div className="sm:col-span-4">
                     <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                       Title *
                     </label>
@@ -145,24 +218,11 @@ export default function DashboardPage() {
                       value={newTodo.title}
                       onChange={(e) => setNewTodo({...newTodo, title: e.target.value})}
                       className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      placeholder="What needs to be done?"
                     />
                   </div>
 
-                  <div className="col-span-6">
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                      Description
-                    </label>
-                    <textarea
-                      id="description"
-                      name="description"
-                      rows={3}
-                      value={newTodo.description}
-                      onChange={(e) => setNewTodo({...newTodo, description: e.target.value})}
-                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                    />
-                  </div>
-
-                  <div className="col-span-6 sm:col-span-3">
+                  <div className="sm:col-span-2">
                     <label htmlFor="status" className="block text-sm font-medium text-gray-700">
                       Status
                     </label>
@@ -179,10 +239,25 @@ export default function DashboardPage() {
                     </select>
                   </div>
 
-                  <div className="col-span-6">
+                  <div className="sm:col-span-6">
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                      Description
+                    </label>
+                    <textarea
+                      id="description"
+                      name="description"
+                      rows={3}
+                      value={newTodo.description}
+                      onChange={(e) => setNewTodo({...newTodo, description: e.target.value})}
+                      className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
+                      placeholder="Add details about this task..."
+                    />
+                  </div>
+
+                  <div className="sm:col-span-6">
                     <button
                       type="submit"
-                      className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                       Create Todo
                     </button>
@@ -194,13 +269,18 @@ export default function DashboardPage() {
 
           {/* Todo List */}
           <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="px-4 py-5 sm:px-6">
+            <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
               <h3 className="text-lg leading-6 font-medium text-gray-900">Your Todos ({todos.length})</h3>
+              <p className="mt-1 max-w-2xl text-sm text-gray-500">Manage your tasks efficiently</p>
             </div>
             <div className="border-t border-gray-200">
               {todos.length === 0 ? (
-                <div className="px-4 py-5 sm:p-6 text-center">
-                  <p className="text-gray-500">You don't have any todos yet. Create one above!</p>
+                <div className="px-4 py-12 sm:px-6 text-center">
+                  <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No tasks yet</h3>
+                  <p className="mt-1 text-sm text-gray-500">Get started by creating a new todo.</p>
                 </div>
               ) : (
                 <ul className="divide-y divide-gray-200">
@@ -209,8 +289,8 @@ export default function DashboardPage() {
                       {editingTodo?.id === todo.id ? (
                         // Edit form for this todo
                         <form onSubmit={handleUpdateTodo} className="px-4 py-5 sm:px-6 bg-blue-50">
-                          <div className="grid grid-cols-6 gap-6">
-                            <div className="col-span-6">
+                          <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                            <div className="sm:col-span-4">
                               <label htmlFor={`edit-title-${todo.id}`} className="block text-sm font-medium text-gray-700">
                                 Title *
                               </label>
@@ -224,21 +304,7 @@ export default function DashboardPage() {
                               />
                             </div>
 
-                            <div className="col-span-6">
-                              <label htmlFor={`edit-description-${todo.id}`} className="block text-sm font-medium text-gray-700">
-                                Description
-                              </label>
-                              <textarea
-                                id={`edit-description-${todo.id}`}
-                                name="description"
-                                rows={2}
-                                value={editForm.description || ''}
-                                onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
-                              />
-                            </div>
-
-                            <div className="col-span-6 sm:col-span-3">
+                            <div className="sm:col-span-2">
                               <label htmlFor={`edit-status-${todo.id}`} className="block text-sm font-medium text-gray-700">
                                 Status
                               </label>
@@ -255,10 +321,24 @@ export default function DashboardPage() {
                               </select>
                             </div>
 
-                            <div className="col-span-6">
+                            <div className="sm:col-span-6">
+                              <label htmlFor={`edit-description-${todo.id}`} className="block text-sm font-medium text-gray-700">
+                                Description
+                              </label>
+                              <textarea
+                                id={`edit-description-${todo.id}`}
+                                name="description"
+                                rows={2}
+                                value={editForm.description || ''}
+                                onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                                className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 mt-1 block w-full sm:text-sm border border-gray-300 rounded-md"
+                              />
+                            </div>
+
+                            <div className="sm:col-span-6">
                               <button
                                 type="submit"
-                                className="inline-flex justify-center mr-2 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                                className="inline-flex justify-center mr-3 py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                               >
                                 Save
                               </button>
@@ -275,21 +355,29 @@ export default function DashboardPage() {
                       ) : (
                         // Display todo
                         <div className="px-4 py-5 sm:px-6">
-                          <div className="flex justify-between">
-                            <div>
-                              <h4 className="text-lg font-medium text-gray-900">{todo.title}</h4>
-                              <p className="mt-1 text-sm text-gray-500">{todo.description}</p>
-                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                todo.status === 'pending' 
-                                  ? 'bg-yellow-100 text-yellow-800' 
-                                  : todo.status === 'in-progress' 
-                                    ? 'bg-blue-100 text-blue-800' 
-                                    : 'bg-green-100 text-green-800'
-                              }`}>
-                                {todo.status}
-                              </span>
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center">
+                                <h4 className="text-lg font-medium text-gray-900 truncate">{todo.title}</h4>
+                                <span className={`ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  todo.status === 'pending'
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : todo.status === 'in-progress'
+                                      ? 'bg-blue-100 text-blue-800'
+                                      : 'bg-green-100 text-green-800'
+                                }`}>
+                                  {todo.status}
+                                </span>
+                              </div>
+                              <p className="mt-2 text-sm text-gray-500">{todo.description}</p>
+                              <div className="mt-2 flex items-center text-xs text-gray-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="mr-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <span>Created: {new Date(todo.created_at).toLocaleDateString()}</span>
+                              </div>
                             </div>
-                            <div className="flex space-x-2">
+                            <div className="mt-4 sm:mt-0 flex space-x-2">
                               <button
                                 onClick={() => startEditing(todo)}
                                 className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -304,9 +392,6 @@ export default function DashboardPage() {
                               </button>
                             </div>
                           </div>
-                          <div className="mt-2 text-xs text-gray-500">
-                            Created: {new Date(todo.created_at).toLocaleString()}
-                          </div>
                         </div>
                       )}
                     </li>
@@ -316,7 +401,23 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="bg-white mt-12">
+        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div className="md:flex md:items-center md:justify-between">
+            <div className="flex justify-center md:justify-start">
+              <span className="text-indigo-600 font-bold text-xl">TodoApp</span>
+            </div>
+            <div className="mt-4 md:mt-0 md:order-1">
+              <p className="text-center text-base text-gray-400">
+                &copy; 2026 TodoApp. All rights reserved.
+              </p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
