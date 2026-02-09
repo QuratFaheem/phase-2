@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserRegistration } from '../../../types/todo';
-import { authActions } from '../../../lib/auth';
+import { authApi } from '../../../services/api';
 import Link from 'next/link';
 
 export default function SignUpPage() {
@@ -30,7 +30,7 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      await authActions.register(formData);
+      await authApi.signUp(formData);
       router.push('/dashboard'); // Redirect to dashboard after successful registration
     } catch (err: any) {
       setError(err.message || 'Registration failed');

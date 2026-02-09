@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserCredentials } from '../../../types/todo';
-import { authActions } from '../../../lib/auth';
+import { authApi } from '../../../services/api';
 import Link from 'next/link';
 
 export default function SignInPage() {
@@ -29,7 +29,7 @@ export default function SignInPage() {
     setLoading(true);
 
     try {
-      await authActions.signIn(formData);
+      await authApi.signIn(formData);
       router.push('/dashboard'); // Redirect to dashboard after successful sign in
     } catch (err: any) {
       setError(err.message || 'Sign in failed');

@@ -1,40 +1,14 @@
 from sqlmodel import SQLModel, Field
+import uuid
 from datetime import datetime
 from typing import Optional
-import uuid
-from pydantic import field_validator
 
-class UserBase(SQLModel):
-    name: str = Field(max_length=100)
-    email: str = Field(unique=True, max_length=255)
+class User(SQLModel, table=True):
+    __tablename__ = "users"
 
-class User(UserBase, table=True):
-    id: Optional[uuid.UUID] = Field(default_factory=uuid.uuid4, primary_key=True)
-    password_hash: str
-    created_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(default_factory=datetime.utcnow)
-
-class UserCreate(UserBase):
-    password: str
-
-    @field_validator('password')
-    @classmethod
-    def validate_password_length(cls, v):
-        if len(v) > 72:
-            raise ValueError('Password must not exceed 72 characters')
-        return v
-
-class UserRead(UserBase):
-    id: uuid.UUID
-    created_at: datetime
-
-class UserLogin(SQLModel):
-    email: str
-    password: str
-
-    @field_validator('password')
-    @classmethod
-    def validate_password_length(cls, v):
-        if len(v) > 72:
-            raise ValueError('Password must not exceed 72 characters')
-        return v
+    id: Optional[int] = Field(default=None, sa_column_kwargs={"primary_key": True})
+    email: str = Field(sa_column_kwargs={"nullable": False, "max_length": 255})
+    name: Optional[str] = Field(default=None, sa_column_kwargs={"nullable": True, "max_length": 255})
+    hashed_password: str = Field(sa_column_kwargs={"nullable": False})
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)

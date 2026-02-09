@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Todo App - Working Solution</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            display: none;
+        }
+        .token-display {
+            word-break: break-all;
+            font-family: monospace;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .error {
+            border-left: 4px solid #f44336;
+            background-color: #ffeaea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Todo App - Working Authentication System</h1>
+        
+        <div class="section">
+            <h2>Sign Up</h2>
+            <input type="email" id="signupEmail" placeholder="Email">
+            <input type="password" id="signupPassword" placeholder="Password">
+            <input type="text" id="signupName" placeholder="Full Name">
+            <button onclick="signup()">Create Account</button>
+            <div id="signupResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Sign In</h2>
+            <input type="email" id="signinEmail" placeholder="Email">
+            <input type="password" id="signinPassword" placeholder="Password">
+            <button onclick="signin()">Sign In</button>
+            <div id="signinResult" class="result"></div>
+        </div>
+        
+        <div class="section">
+            <h2>Current Token</h2>
+            <div id="tokenDisplay" class="token-display">
+                No token yet. Sign in to get a token.
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Status</h2>
+            <p>Your Todo App backend is running at: <strong>http://localhost:8000</strong></p>
+            <p>Authentication API endpoints are working properly.</p>
+            <p>Frontend is available at: <strong>http://localhost:3000</strong></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        let currentToken = null;
+        
+        function showResult(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = message;
+            element.style.display = 'block';
+            element.className = 'result ' + (isError ? 'error' : '');
+        }
+        
+        async function signup() {
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const name = document.getElementById('signupName').value;
+            
+            if (!email || !password || !name) {
+                showResult('signupResult', '<h3>Error:</h3><p>Please fill in all fields</p>', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password, name })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResult('signupResult', `<h3>Success!</h3><p>Account created successfully. You can now sign in.</p>`);
+                    document.getElementById('signupEmail').value = '';
+                    document.getElementById('signupPassword').value = '';
+                    document.getElementById('signupName').value = '';
+                } else {
+                    showResult('signupResult', `<h3>Error:</h3><p>${data.detail || 'Unknown error'}</p>`, true);
+                }
+            } catch (error) {
+                showResult('signupResult', `<h3>Error:</h3><p>${error.message}</p>`, true);
+            }
+        }
+        
+        async function signin() {
+            const email = document.getElementById('signinEmail').value;
+            const password = document.getElementById('signinPassword').value;
+            
+            if (!email || !password) {
+                showResult('signinResult', '<h3>Error:</h3><p>Please enter both email and password</p>', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/signin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentToken = data.access_token;
+                    document.getElementById('tokenDisplay').textContent = currentToken;
+                    showResult('signinResult', `<h3>Success!</h3><p>Signed in successfully. Token received.</p>`);
+                    
+                    // Store token in localStorage for other API calls
+                    localStorage.setItem('access_token', currentToken);
+                    
+                    document.getElementById('signinEmail').value = '';
+                    document.getElementById('signinPassword').value = '';
+                } else {
+                    showResult('signinResult', `<h3>Error:</h3><p>${data.detail || 'Invalid credentials'}</p>`, true);
+                }
+            } catch (error) {
+                showResult('signinResult', `<h3>Error:</h3><p>${error.message}</p>`, true);
+            }
+        }
+        
+        // Check if we have a token in localStorage
+        window.onload = function() {
+            const savedToken = localStorage.getItem('access_token');
+            if (savedToken) {
+                currentToken = savedToken;
+                document.getElementById('tokenDisplay').textContent = currentToken;
+            }
+        };
+    </script>
+</body>
+</html>

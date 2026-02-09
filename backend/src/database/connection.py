@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Get database URL from environment variable
-# Using SQLite for local development
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./todo.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./todo_app.db")
 
 # Create the engine
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
