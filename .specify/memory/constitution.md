@@ -1,55 +1,122 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report:
+- Version change: N/A → 1.0.0 (initial constitution for Todo Application with AI Chatbot)
+- Modified principles: N/A (new file)
+- Added sections: All sections (new constitution)
+- Removed sections: N/A
+- Templates requiring updates: ✅ updated / ⚠ pending
+- Follow-up TODOs: None
+-->
+# Multi-User Todo Application with AI Chatbot Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Spec-Driven Development Only
+All functionality must originate from written specifications. Manual code edits are strictly forbidden. All code must be generated via Claude Code + Spec-Kit Plus. Development follows the mandatory workflow: /sp.specify → /sp.clarify → /sp.plan → /sp.tasks → /sp.implement. Any implementation not traceable to specs is invalid.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Agentic Dev Stack Workflow Enforcement
+The development process must follow the agentic workflow with MCP tools. Each phase may extend specs but must not violate this constitution. The system must maintain reproducibility through documented specs, plans, tasks, and prompts.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Security-First, User-Isolated Architecture
+All endpoints (REST and Chat) require authentication. Requests without valid authentication return 401 Unauthorized. Cross-user data access is strictly forbidden. Task ownership must be enforced at the REST API layer, MCP tool layer, and frontend must never be trusted as the source of authorization.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Stateless Backend Services
+Backend servers must hold no session state. For each request: fetch required state from database, execute logic (REST or Agent + MCP), persist results to database, return response. Server must be safe to restart at any time without data loss. Conversation context (Phase III) must be reconstructed from database on every request.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Clear Separation of Concerns
+The system must maintain clear separation of concerns:
+- Frontend UI: Next.js 16+ (App Router) for web app, OpenAI ChatKit for chatbot UI
+- REST API: Python FastAPI with JWT-secured endpoints
+- AI Agent Logic: OpenAI Agents SDK with MCP-based tool invocation
+- MCP Tools: Official MCP SDK only
+- Database Persistence: Neon Serverless PostgreSQL with SQLModel ORM
 
-### [PRINCIPLE_6_NAME]
+### VI. Database as Single Source of Truth
+Database is the single source of truth. All user actions must be authenticated and authorized. Backend services must not rely on in-memory state. AI agents must never directly access the database - all task operations must be performed via MCP tools.
 
+## Technology Constraints
 
-[PRINCIPLE__DESCRIPTION]
+### Frontend Requirements
+- Next.js 16+ (App Router) for web app
+- OpenAI ChatKit for chatbot UI
+- Responsive frontend interface
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### Backend Requirements
+- Python FastAPI
+- ORM: SQLModel only
+- Database: Neon Serverless PostgreSQL
+- Authentication: Better Auth with JWT-based authentication
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### AI & MCP Framework Requirements
+- OpenAI Agents SDK
+- Official MCP SDK only
+- MCP tools must be stateless and persist state in the database
+- MCP tools must enforce user ownership using user_id
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## API Contract Standards (Phase II)
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### REST API Rules
+API endpoints must follow defined contracts:
+- GET /api/{user_id}/tasks
+- POST /api/{user_id}/tasks
+- GET /api/{user_id}/tasks/{id}
+- PUT /api/{user_id}/tasks/{id}
+- DELETE /api/{user_id}/tasks/{id}
+- PATCH /api/{user_id}/tasks/{id}/complete
+
+All API requests must include Authorization: Bearer <JWT>. Backend must verify JWT signature and expiry, match JWT user with {user_id} in route, and filter all data by authenticated user.
+
+### AI Agent Rules (Phase III)
+AI agents must:
+- Interpret natural language intent
+- Select correct MCP tools
+- Confirm actions in natural language
+- Handle errors gracefully
+- Never hallucinate task data
+
+AI agents must never directly access the database. All task operations must be performed via MCP tools.
+
+## Data Models
+
+### Task Model
+Fields: id, user_id, title, description, completed, created_at, updated_at
+
+### Conversation Model
+Fields: id, user_id, created_at, updated_at
+
+### Message Model
+Fields: id, conversation_id, user_id, role, content, created_at
+
+## Statelessness Requirements
+
+All services must follow stateless execution rules:
+- Backend servers must hold no session state
+- For each request: Fetch required state from database, Execute logic (REST or Agent + MCP), Persist results to database, Return response
+- Conversation context (Phase III) must be reconstructed from database on every request
+- Server must be safe to restart at any time without data loss
+
+## Success Criteria
+
+### Phase II - Full-Stack Web Application
+- Fully functional multi-user Todo web application
+- Secure REST API with JWT
+- Persistent storage in Neon PostgreSQL
+- Multi-user Todo web application with responsive UI
+
+### Phase III - Todo AI Chatbot
+- Fully functional AI chatbot for Todo management
+- MCP tools correctly invoked by AI agent
+- Stateless chat with persistent conversation memory
+- Natural language interaction via AI agent
+
+### Overall Project Requirements
+- Entire project must be reviewable via specs alone
+- No manual coding violations
+- Clear, scalable, production-style architecture
+- Conversational interface for managing todos with MCP-based tool invocation
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution is the single source of truth for both Phase II and Phase III. Any behavior, implementation, or decision that conflicts with this document is invalid. Amendments require documentation, approval, and migration plan. All PRs/reviews must verify compliance with these principles.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-02-09 | **Last Amended**: 2026-02-09
